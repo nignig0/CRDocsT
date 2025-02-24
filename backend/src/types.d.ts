@@ -15,6 +15,6 @@ export interface Operation extends Identified {
     documentId: string | Mongoose.Types.ObjectId,
     type: OperationType,
     cause?: string | Mongoose.Types.ObjectId
-    index: number // gonna be using decimals for the unique index
+    uid: number // gonna be using decimals for the unique index
     character?: string //we only need the character if there are many  
 }
