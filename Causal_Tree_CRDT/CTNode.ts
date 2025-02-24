@@ -1,7 +1,7 @@
 class CTNode {
     uid: string; //userId @ lamport timestamp
     character?: string;
-    children?: CTNode[];
+    cause?: CTNode; //the causal prior?
 
     constructor(uid: string){
         this.uid = uid;
