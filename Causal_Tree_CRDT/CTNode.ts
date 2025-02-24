@@ -1,11 +1,11 @@
 class CTNode {
-    uid: number;
-    character: string;
+    uid: string; //userId @ lamport timestamp
+    character?: string;
     children?: CTNode[];
 
-    constructor(uid: number, character: string){
+    constructor(uid: string){
         this.uid = uid;
-        this.character = character;
     }
+
 
 }

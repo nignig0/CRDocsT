@@ -22,7 +22,7 @@ const OperationSchema = new Schema<Operation>({
     },
 
     uid: {
-        type: Number,
+        type: String,
         required: true
     },
     
