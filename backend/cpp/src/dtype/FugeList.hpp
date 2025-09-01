@@ -14,6 +14,8 @@ using std::optional, std::string, std::vector;
 
 namespace rg = std::ranges;
 
+constexpr string tombstone = "ð";
+
 template <typename P>
 struct FNode {
     P pos;
@@ -63,10 +65,10 @@ struct FugueList {
                 vector<string> transformed;
                 transformed.reserve(idx.size());
                 rg::transform(sorted, std::back_inserter(transformed),
-                              [](const auto& node) { return node.value.has_value() ? *(node.value) : "M"; });
+                              [](const auto& node) { return node.value.has_value() ? *(node.value) : tombstone; });
                 rg::for_each(transformed, [&ss](const auto& node) { ss << node; });
             } else {
-                ss << (idx[0].value.has_value() ? *(idx[0].value) : "ð");
+                ss << (idx[0].value.has_value() ? *(idx[0].value) : tombstone);
             }
         }
         return ss.str();
