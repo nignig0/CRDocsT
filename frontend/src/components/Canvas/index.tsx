@@ -1,12 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { FugueList } from "@cr_docs_t/dts";
 import { StringTotalOrder } from "@cr_docs_t/dts";
+import { handleInputTypes } from "../../utils";
 
 const Canvas = () => {
     const divRef = useRef<HTMLDivElement>(null);
     const [fugue] = useState(() => new FugueList(new StringTotalOrder("test")));
     const [text, setText] = useState("");
     const cursorPositionRef = useRef(0);
+    const socketRef = useRef<WebSocket>(null);
+
+    const webSocketUrl = import.meta.env.VITE_WSS_URL as string;
+    console.log(webSocketUrl);
 
     const getCursorIndex = (root: Node): number => {
         const sel = window.getSelection();
@@ -72,30 +77,9 @@ const Canvas = () => {
             const pos = getCursorIndex(divRef.current);
             let newCursorPos = pos;
 
-            switch (e.inputType) {
-                case "insertText":
-                    if (e.data) {
-                        fugue.insert(pos, e.data);
-                        newCursorPos = pos + e.data.length;
-                    }
-                    break;
-
-                case "deleteContentBackward":
-                    if (pos > 0) {
-                        fugue.delete(pos - 1);
-                        newCursorPos = pos - 1;
-                    }
-                    break;
-
-                case "deleteContentForward":
-                    fugue.delete(pos);
-                    newCursorPos = pos;
-                    break;
-
-                default:
-                    console.log("Unhandled input type:", e.inputType);
-                    return;
-            }
+            newCursorPos = handleInputTypes(
+                e.inputType, pos, fugue, socketRef.current, e.data
+            );
 
             cursorPositionRef.current = newCursorPos;
             console.log({ fugue });
@@ -120,6 +104,26 @@ const Canvas = () => {
             setCursorPosition(divRef.current, cursorPositionRef.current);
         }
     }, [text]);
+
+    useEffect(()=>{
+        socketRef.current = new WebSocket(webSocketUrl);
+        if(!socketRef.current) return;
+        socketRef.current.onopen = ()=>{
+            console.log('We have made connection');
+        };
+
+        socketRef.current.onmessage = (ev: MessageEvent)=>{
+            console.log('Received message -> ', ev.data);
+            const {inputType, pos, data} = JSON.parse(ev.data);
+            const newCursorPos = handleInputTypes(inputType, pos, fugue, undefined, data);
+            cursorPositionRef.current = newCursorPos;
+            setText(fugue.observe());
+        }
+
+        return ()=>{
+            socketRef.current!.close();
+        }
+    }, []);
 
     return (
         <div className="flex flex-col items-center p-4 w-full h-full">
