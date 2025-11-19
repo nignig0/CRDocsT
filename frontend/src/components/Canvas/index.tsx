@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { FugueList, FugueMessage, Operation, StringTotalOrder } from "@cr_docs_t/dts";
+import { FugueList, FugueMessage, Operation, StringPosition, StringTotalOrder } from "@cr_docs_t/dts";
 import { handleInputTypes, randomString } from "../../utils";
 
 const Canvas = () => {
@@ -75,28 +75,17 @@ const Canvas = () => {
 
             const pos = getCursorIndex(divRef.current);
             let newCursorPos = pos;
-            console.log({ input: e.inputType });
 
+            console.log({ inputType: e.inputType, data: e.data });
             switch (e.inputType) {
                 case "insertText":
-                    newCursorPos = handleInputTypes(
-                        fugue.totalOrder.getReplicaId(),
-                        Operation.INSERT,
-                        pos,
-                        fugue,
-                        socketRef.current,
-                        e.data,
-                    );
+                    newCursorPos = handleInputTypes(Operation.INSERT, pos, fugue, e.data);
+                    break;
+                case "insertParagraph":
+                    newCursorPos = handleInputTypes(Operation.INSERT, pos, fugue, "\n");
                     break;
                 case "deleteContentBackward":
-                    newCursorPos = handleInputTypes(
-                        fugue.totalOrder.getReplicaId(),
-                        Operation.DELETE,
-                        pos,
-                        fugue,
-                        socketRef.current,
-                        e.data,
-                    );
+                    newCursorPos = handleInputTypes(Operation.DELETE, pos, fugue, e.data);
                     break;
             }
 
@@ -130,15 +119,37 @@ const Canvas = () => {
         socketRef.current.onopen = () => {
             console.log("We have made connection");
         };
+
         fugue.ws = socketRef.current;
 
         socketRef.current.onmessage = (ev: MessageEvent) => {
             console.log("Received message -> ", ev.data);
-            const { replicaId, operation, position, data }: FugueMessage = JSON.parse(ev.data);
-            console.log({ ev: ev.data });
-            const newCursorPos = handleInputTypes(replicaId, operation, position, fugue, undefined, data);
-            cursorPositionRef.current = newCursorPos;
-            setText(fugue.observe());
+
+            try {
+                const msg: FugueMessage<StringPosition> = JSON.parse(ev.data);
+                const { replicaId, operation, position, data } = msg;
+                if (replicaId === fugue.replicaId()) {
+                    console.log("Ignoring own message");
+                    return;
+                }
+
+                console.log({
+                    receivedMessage: msg,
+                    remoteOperation: operation,
+                    remotePosition: position,
+                    remoteData: data,
+                });
+
+                fugue.effect(msg);
+                setText(fugue.observe());
+
+                if (divRef.current) {
+                    // Restore cursor position after DOM update
+                    setCursorPosition(divRef.current, cursorPositionRef.current);
+                }
+            } catch (error) {
+                console.error("Error parsing message:", error);
+            }
         };
 
         return () => {

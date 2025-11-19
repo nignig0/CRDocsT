@@ -40,7 +40,7 @@ wss.on("connection", (ws: WebSocket) => {
         console.log("A message has been sent");
         console.log("Message -> ", message.toString());
 
-        const { operation, position, data }: FugueMessage = JSON.parse(message.toString());
+        const { operation, position, data }: FugueMessage<string> = JSON.parse(message.toString());
 
         for (const userId of users.keys()) {
             if (userId === id) continue;
