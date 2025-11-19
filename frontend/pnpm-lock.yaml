@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@cr_docs_t/dts':
-        specifier: link:/home/mads/projects/Typescript/applied_crdt/CRDocsT-dts
-        version: link:../../CRDocsT-dts
+        specifier: ^0.0.10
+        version: 0.0.10
       '@tailwindcss/vite':
         specifier: ^4.1.17
         version: 4.1.17(vite@6.4.1(jiti@2.6.1)(lightningcss@1.30.2))
@@ -162,6 +162,9 @@ packages:
   '@babel/types@7.28.5':
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
+
+  '@cr_docs_t/dts@0.0.10':
+    resolution: {integrity: sha512-RF5V/kTfHBWCtW9nsIKz3nQ88eqQ/Qu1iy+dMboFzs0m7DqDV9ewZV352PIM0LSKo9V+fhlQh33cAyxx6iGnow==}
 
   '@esbuild/aix-ppc64@0.25.0':
     resolution: {integrity: sha512-O7vun9Sf8DFjH2UtqK8Ku3LkquL9SZL8OLY1T5NZkA34+wG3OQF7cl4Ql8vdNzM6fzBbYfLaiRLIOZ+2FOCgBQ==}
@@ -1468,6 +1471,8 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
+
+  '@cr_docs_t/dts@0.0.10': {}
 
   '@esbuild/aix-ppc64@0.25.0':
     optional: true
