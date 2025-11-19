@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { FugueList } from "@cr_docs_t/dts";
-import { StringTotalOrder } from "@cr_docs_t/dts";
-import { handleInputTypes } from "../../utils";
+import { FugueList, FugueMessage, Operation, StringTotalOrder } from "@cr_docs_t/dts";
+import { handleInputTypes, randomString } from "../../utils";
 
 const Canvas = () => {
     const divRef = useRef<HTMLDivElement>(null);
-    const [fugue] = useState(() => new FugueList(new StringTotalOrder("test")));
     const [text, setText] = useState("");
     const cursorPositionRef = useRef(0);
     const socketRef = useRef<WebSocket>(null);
+    const [fugue] = useState(() => new FugueList(new StringTotalOrder(randomString(10)), null));
 
     const webSocketUrl = import.meta.env.VITE_WSS_URL as string;
     console.log(webSocketUrl);
@@ -76,10 +75,30 @@ const Canvas = () => {
 
             const pos = getCursorIndex(divRef.current);
             let newCursorPos = pos;
+            console.log({ input: e.inputType });
 
-            newCursorPos = handleInputTypes(
-                e.inputType, pos, fugue, socketRef.current, e.data
-            );
+            switch (e.inputType) {
+                case "insertText":
+                    newCursorPos = handleInputTypes(
+                        fugue.totalOrder.getReplicaId(),
+                        Operation.INSERT,
+                        pos,
+                        fugue,
+                        socketRef.current,
+                        e.data,
+                    );
+                    break;
+                case "deleteContentBackward":
+                    newCursorPos = handleInputTypes(
+                        fugue.totalOrder.getReplicaId(),
+                        Operation.DELETE,
+                        pos,
+                        fugue,
+                        socketRef.current,
+                        e.data,
+                    );
+                    break;
+            }
 
             cursorPositionRef.current = newCursorPos;
             console.log({ fugue });
@@ -105,24 +124,27 @@ const Canvas = () => {
         }
     }, [text]);
 
-    useEffect(()=>{
+    useEffect(() => {
         socketRef.current = new WebSocket(webSocketUrl);
-        if(!socketRef.current) return;
-        socketRef.current.onopen = ()=>{
-            console.log('We have made connection');
+        if (!socketRef.current) return;
+        socketRef.current.onopen = () => {
+            console.log("We have made connection");
         };
+        fugue.ws = socketRef.current;
 
-        socketRef.current.onmessage = (ev: MessageEvent)=>{
-            console.log('Received message -> ', ev.data);
-            const {inputType, pos, data} = JSON.parse(ev.data);
-            const newCursorPos = handleInputTypes(inputType, pos, fugue, undefined, data);
+        socketRef.current.onmessage = (ev: MessageEvent) => {
+            console.log("Received message -> ", ev.data);
+            const { replicaId, operation, position, data }: FugueMessage = JSON.parse(ev.data);
+            console.log({ ev: ev.data });
+            const newCursorPos = handleInputTypes(replicaId, operation, position, fugue, undefined, data);
             cursorPositionRef.current = newCursorPos;
             setText(fugue.observe());
-        }
+        };
 
-        return ()=>{
+        return () => {
+            fugue.ws = null;
             socketRef.current!.close();
-        }
+        };
     }, []);
 
     return (
