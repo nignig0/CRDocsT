@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "nodemon src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,11 +16,13 @@
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.5",
     "@types/ws": "^8.5.14",
+    "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@cr_docs_t/dts": "link:/home/mads/projects/Typescript/applied_crdt/CRDocsT-dts",
     "@types/mongoose": "^5.11.97",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
