@@ -1,65 +1,57 @@
-import { FugueList } from "@cr_docs_t/dts"
-
+import { FugueList, Operation, StringPosition } from "@cr_docs_t/dts";
 /**
- * 
- * @param inputType 
- * @param pos 
- * @param fugue 
+ *
+ * @param operation
+ * @param index
+ * @param fugue
  * @param ws if this is there, then we are broadcasting this event
- * @param data the data 
+ * @param data the data
  * @returns the new position of the cursor... we won't use it when we receive operations
  */
-export const handleInputTypes = (inputType: string, pos: number,
-     fugue: FugueList<string>, ws?: WebSocket | null, data?: string | null, 
-    )=>{
+export const handleInputTypes = (
+    operation: Operation,
+    index: number,
+    fugue: FugueList<string>,
+    data?: string | null,
+) => {
+    let newCursorPos = index;
 
-
-    let newCursorPos = pos;
-    switch (inputType) {
-        case "insertText":
+    console.log({ operation });
+    switch (operation) {
+        case Operation.INSERT:
             if (data) {
-                fugue.insert(pos, data);
-                    newCursorPos = pos + data.length;
-                    //send the operation to the server through the websocket here?
-                }
-            if(ws){
-                ws.send(JSON.stringify({
-                    inputType,
-                    pos, 
-                    data
-                }));
+                fugue.insert(index, data);
+                newCursorPos = index + data.length;
             }
-            break;
-    
-        case "deleteContentBackward":
-            if (pos > 0) {
-                fugue.delete(pos - 1);
-                newCursorPos = pos - 1;
-            }
-            if(ws){
-                ws.send(JSON.stringify({
-                    inputType,
-                    pos, 
-                    data
-                }));
-            }
-            break;
-    
-        case "deleteContentForward":
-            fugue.delete(pos);
-            newCursorPos = pos;
-            if(ws){
-                ws.send(JSON.stringify({
-                    inputType,
-                    pos, 
-                    data
-                }));
-            } //this repetition is kinda ugly
-            break;
-    
-        default:
-            console.log("Unhandled input type:", inputType);
-        }
+            return newCursorPos;
 
-        return newCursorPos;
+        case Operation.DELETE:
+            const idx = index - 1;
+            if (idx >= 0) {
+                fugue.delete(idx);
+                newCursorPos = idx;
+            }
+            return newCursorPos;
+
+        // case "deleteContentForward":
+        //     fugue.delete(pos);
+        //     newCursorPos = pos;
+        //     if (ws) {
+        //         ws.send(
+        //             JSON.stringify({
+        //                 inputType,
+        //                 pos,
+        //                 data,
+        //             }),
+        //         );
+        //     } //this repetition is kinda ugly
+        //     break;
+    }
+    console.log("Unhandled input type:", operation);
+};
+
+export function randomString(length: number = 10): string {
+    let res = new Array<string>(length);
+    for (let i = 0; i < length; i++) res[i] = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+    return res.join("");
 }
