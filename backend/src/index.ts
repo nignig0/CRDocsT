@@ -5,7 +5,7 @@ import cors from "cors";
 import WebSocket, { WebSocketServer } from "ws";
 import mongoose from "mongoose";
 import crypto from "crypto";
-import { FugueMessage } from "@cr_docs_t/dts";
+import { FugueList, FugueMessage, Operation, StringTotalOrder } from "@cr_docs_t/dts";
 
 dotenv.config();
 
@@ -26,6 +26,8 @@ const users: Map<String, WebSocket> = new Map();
 
 const wss = new WebSocketServer({ server });
 
+const centralCRDT = new FugueList(new StringTotalOrder(crypto.randomBytes(10).toString()), null);
+
 wss.on("connection", (ws: WebSocket) => {
     console.log("New Web Socket Connection!");
     let id = crypto.randomBytes(5).toString("hex");
@@ -34,14 +36,20 @@ wss.on("connection", (ws: WebSocket) => {
     }
 
     console.log(`User ${id} has joined`);
-
     users.set(id, ws);
+    
+    //need to broadcast the crdt to the new user, but the user has their own crdt
+    ws.send(JSON.stringify({
+        operation: Operation.JOIN,
+        state: centralCRDT.state
+    }));
+    
     ws.on("message", (message: WebSocket.Data) => {
         console.log("A message has been sent");
         console.log("Message -> ", message.toString());
 
         const { operation, position, data }: FugueMessage<string> = JSON.parse(message.toString());
-
+        centralCRDT.effect(JSON.parse(message.toString()));
         for (const userId of users.keys()) {
             if (userId === id) continue;
             users.get(userId)?.send(
