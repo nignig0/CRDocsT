@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { FugueList, FugueMessage, Operation, StringPosition, StringTotalOrder } from "@cr_docs_t/dts";
+import { FugueJoinMessage, FugueList, FugueMessage, Operation, StringPosition, StringTotalOrder } from "@cr_docs_t/dts";
 import { handleInputTypes, randomString } from "../../utils";
 
 const Canvas = () => {
@@ -126,27 +126,33 @@ const Canvas = () => {
             console.log("Received message -> ", ev.data);
 
             try {
-                const msg: FugueMessage<StringPosition> = JSON.parse(ev.data);
-                const { replicaId, operation, position, data } = msg;
-                if (replicaId === fugue.replicaId()) {
-                    console.log("Ignoring own message");
-                    return;
+                const msg: FugueMessage<StringPosition> | FugueJoinMessage<StringPosition> = JSON.parse(ev.data);
+                if("state" in msg){
+                    fugue.state = msg.state;
+                    setText(fugue.observe());
+                }else{
+                    const { replicaId, operation, position, data } = msg;
+                    if (replicaId === fugue.replicaId()) {
+                        console.log("Ignoring own message");
+                        return;
+                    }
+
+                    console.log({
+                        receivedMessage: msg,
+                        remoteOperation: operation,
+                        remotePosition: position,
+                        remoteData: data,
+                    });
+
+                    fugue.effect(msg);
+                    setText(fugue.observe());
+
+                    if (divRef.current) {
+                        // Restore cursor position after DOM update
+                        setCursorPosition(divRef.current, cursorPositionRef.current);
+                    }
                 }
-
-                console.log({
-                    receivedMessage: msg,
-                    remoteOperation: operation,
-                    remotePosition: position,
-                    remoteData: data,
-                });
-
-                fugue.effect(msg);
-                setText(fugue.observe());
-
-                if (divRef.current) {
-                    // Restore cursor position after DOM update
-                    setCursorPosition(divRef.current, cursorPositionRef.current);
-                }
+                
             } catch (error) {
                 console.error("Error parsing message:", error);
             }

@@ -2,7 +2,6 @@
   "name": "crdocst",
   "version": "1.0.0",
   "description": "A very very very simple text editor app built on top of the Fugue CRDT implementation",
-  "main": "index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
@@ -22,7 +21,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@cr_docs_t/dts": "link:/home/mads/projects/Typescript/applied_crdt/CRDocsT-dts",
+    "@cr_docs_t/dts": "^0.0.12",
     "@types/mongoose": "^5.11.97",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

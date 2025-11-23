@@ -32,6 +32,8 @@ export const handleInputTypes = (
                 newCursorPos = idx;
             }
             return newCursorPos;
+        default:
+            return newCursorPos;
 
         // case "deleteContentForward":
         //     fugue.delete(pos);
