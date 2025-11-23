@@ -8,8 +8,8 @@ const CodeMirrorCanvas = () => {
     const [text, setText] = useState("");
     const socketRef = useRef<WebSocket>(null);
     const [fugue] = useState(() => new FugueList(new StringTotalOrder(randomString(10)), null));
-    const previousTextRef = useRef(""); // ✅ Track changes with ref
-    const ignoreNextChangeRef = useRef(false); // ✅ Flag to ignore own updates
+    const previousTextRef = useRef(""); // Track changes with ref
+    const ignoreNextChangeRef = useRef(false); // Flag to ignore own updates
 
     const webSocketUrl = import.meta.env.VITE_WSS_URL as string;
 
