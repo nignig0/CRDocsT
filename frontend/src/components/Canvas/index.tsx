@@ -9,7 +9,7 @@ const Canvas = () => {
     const socketRef = useRef<WebSocket>(null);
     const [fugue] = useState(() => new FugueList(new StringTotalOrder(randomString(3)), null));
 
-    const webSocketUrl = import.meta.env.VITE_WSS_URL as string;
+    const webSocketUrl = import.meta.env.VITE_WSS_URL;
     console.log(webSocketUrl);
 
     const getCursorIndex = (root: Node): number => {
@@ -127,10 +127,10 @@ const Canvas = () => {
 
             try {
                 const msg: FugueMessage<StringPosition> | FugueJoinMessage<StringPosition> = JSON.parse(ev.data);
-                if("state" in msg){
+                if ("state" in msg) {
                     fugue.state = msg.state;
                     setText(fugue.observe());
-                }else{
+                } else {
                     const { replicaId, operation, position, data } = msg;
                     if (replicaId === fugue.replicaId()) {
                         console.log("Ignoring own message");
@@ -152,7 +152,6 @@ const Canvas = () => {
                         setCursorPosition(divRef.current, cursorPositionRef.current);
                     }
                 }
-                
             } catch (error) {
                 console.error("Error parsing message:", error);
             }
