@@ -129,6 +129,7 @@ const Canvas = () => {
                 const msg: FugueMessage<StringPosition> | FugueJoinMessage<StringPosition> = JSON.parse(ev.data);
                 if("state" in msg){
                     fugue.state = msg.state;
+                    setText(fugue.observe());
                 }else{
                     const { replicaId, operation, position, data } = msg;
                     if (replicaId === fugue.replicaId()) {
