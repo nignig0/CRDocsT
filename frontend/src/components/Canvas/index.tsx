@@ -7,7 +7,7 @@ const Canvas = () => {
     const [text, setText] = useState("");
     const cursorPositionRef = useRef(0);
     const socketRef = useRef<WebSocket>(null);
-    const [fugue] = useState(() => new FugueList(new StringTotalOrder(randomString(10)), null));
+    const [fugue] = useState(() => new FugueList(new StringTotalOrder(randomString(3)), null));
 
     const webSocketUrl = import.meta.env.VITE_WSS_URL as string;
     console.log(webSocketUrl);
@@ -106,8 +106,8 @@ const Canvas = () => {
 
     // Sync display when FugueList changes and restore cursor
     useEffect(() => {
-        if (divRef.current && divRef.current.innerText !== text) {
-            divRef.current.innerText = text;
+        if (divRef.current && divRef.current.textContent !== text) {
+            divRef.current.textContent = text;
             // Restore cursor position after DOM update
             setCursorPosition(divRef.current, cursorPositionRef.current);
         }
