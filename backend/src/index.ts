@@ -20,7 +20,7 @@ const app = express();
 app.use(express.json());
 
 const server = http.createServer(app);
-const port = 5001;
+const port = process.env.PORT || 5001;
 
 const users: Map<String, WebSocket> = new Map();
 
@@ -37,13 +37,15 @@ wss.on("connection", (ws: WebSocket) => {
 
     console.log(`User ${id} has joined`);
     users.set(id, ws);
-    
+
     //need to broadcast the crdt to the new user, but the user has their own crdt
-    ws.send(JSON.stringify({
-        operation: Operation.JOIN,
-        state: centralCRDT.state
-    }));
-    
+    ws.send(
+        JSON.stringify({
+            operation: Operation.JOIN,
+            state: centralCRDT.state,
+        }),
+    );
+
     ws.on("message", (message: WebSocket.Data) => {
         console.log("A message has been sent");
         console.log("Message -> ", message.toString());
