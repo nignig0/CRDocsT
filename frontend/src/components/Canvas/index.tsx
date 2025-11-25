@@ -118,9 +118,8 @@ const Canvas = () => {
         if (!socketRef.current) return;
         socketRef.current.onopen = () => {
             console.log("We have made connection");
+            fugue.ws = socketRef.current;
         };
-
-        fugue.ws = socketRef.current;
 
         socketRef.current.onmessage = (ev: MessageEvent) => {
             console.log("Received message -> ", ev.data);
